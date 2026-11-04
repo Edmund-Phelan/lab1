@@ -1,7 +1,7 @@
 # CS6524: Computer Vision — Lab 1: Silhouettes and Fourier Epicycles
 
 **Immersive Software Engineering (ISE) — University of Limerick**  
-**Instructor:** Juan Albarracín | **Module Lead:** James Patten  
+**Instructor:** Juan Albarracín | **Teacher Assistant:** Thendral Balakrishnan | **Module Lead:** James Patten  
 **Deadline:** Sunday, November 8th at Midnight (Autumn Semester Week 2)
 
 ---
@@ -16,7 +16,7 @@ Understand the use of linear filters on images given a specific objective, and l
 
 An **epicycle** is a geometric model from ancient and medieval astronomy in which a planet moves along a small circle (the epicycle) whose center travels along a larger circle (the deferent) centered on or near the Earth. Used primarily to describe planetary orbits prior to Kepler's laws of planetary motion, epicycles nowadays serve as an intuitive visualization of the Fourier decomposition of complex 2D signals.
 
-![Fourier Epicycles Concept Sketch](assets/fourier_epicycles_concept.png)
+![Fourier Epicycles Concept Sketch](assets/md/fourier_epicycles_concept.png)
 *Figure 1: Fourier Epicycles Concept Sketch showing fundamental frequency ($n=1$) and higher harmonics ($n=3$) tracing a complex path.*
 
 ### How Epicycles Work
@@ -40,11 +40,11 @@ In this laboratory, you will implement an algorithm that draws an object's silho
 
 | Step | Visual Output | Description |
 | :--- | :---: | :--- |
-| **i) Raw Image** | ![Original Image](assets/step1_original.png) | Start with a standard color image. |
-| **ii) Grayscale** | ![Grayscale Image](assets/step2_grayscale.png) | Transform the image into grayscale for convenience. |
-| **iii) Blurring** | ![Blurred Image](assets/step3_blurred.png) | Apply Gaussian blur/smoothing to remove artifacts (e.g., top-left text). |
-| **iv) Thresholding** | ![Thresholded Image](assets/step4_thresholded.png) | Apply a fixed threshold to segment the silhouette. |
-| **v) Border Detection** | ![Border Detection Image](assets/step5_border_detection.png) | Apply derivative/border detection filters to extract object edges. |
+| **i) Raw Image** | ![Original Image](assets/md/duck.png) | Start with a standard color image. |
+| **ii) Grayscale** | ![Grayscale Image](assets/md/duck_gray.png) | Transform the image into grayscale for convenience. |
+| **iii) Blurring** | ![Blurred Image](assets/md/duck_blurr.png) | Apply Gaussian blur/smoothing to remove artifacts (e.g., top-left text). |
+| **iv) Thresholding** | ![Thresholded Image](assets/md/duck_threshold.png) | Apply a fixed threshold to segment the silhouette. |
+| **v) Border Detection** | ![Border Detection Image](assets/md/duck_borders.png) | Apply derivative/border detection filters to extract object edges. |
 
 > **Tip:** Don't worry if the silhouette is not a perfect closed shape—attaining absolute perfection is out of scope. Just ensure that the borders are thin and have as few gaps as possible.
 
@@ -54,7 +54,15 @@ In this laboratory, you will implement an algorithm that draws an object's silho
 
 Once you have identified the edge pixels corresponding to the silhouette, transform them into a 2D parametric curve $(x(t), y(t))$, where $x(t)$ is as close as possible to $x(t+1)$.
 
-![Trajectory Sorting Sequence](assets/trajectory_sorting_sequence.png)
+![Trajectory Sorting Sequence](assets/md/duck_1.png)
+![Trajectory Sorting Sequence](assets/md/duck_2.png)
+![Trajectory Sorting Sequence](assets/md/duck_3.png)
+![Trajectory Sorting Sequence](assets/md/duck_4.png)
+![Trajectory Sorting Sequence](assets/md/duck_5.png)
+![Trajectory Sorting Sequence](assets/md/duck_6.png)
+![Trajectory Sorting Sequence](assets/md/duck_7.png)
+![Trajectory Sorting Sequence](assets/md/duck_8.png)
+![Trajectory Sorting Sequence](assets/md/duck_9.png)
 *Figure 2: Ordered progression of tracing the object's boundary pixel trajectory.*
 
 You can use the following reference Python snippet to sort and resample your silhouette points:
@@ -77,7 +85,7 @@ while unvisited:
 ordered_pts = np.array(ordered_pts)
 
 # Resampling to fixed number of uniform samples
-num_samples = 10000
+num_samples = 500
 distances = np.sqrt(np.sum(np.diff(ordered_pts, axis=0) ** 2, axis=1))
 cumulative_dist = np.insert(np.cumsum(distances), 0, 0)
 total_length = cumulative_dist[-1]
@@ -108,7 +116,7 @@ where:
 * $F[u]$ contains the harmonic amplitudes/phases.
 * $\omega[u]$ represents the corresponding frequencies.
 
-![Harmonic Reconstruction Progression](assets/fourier_reconstruction_progression.png)
+![Harmonic Reconstruction Progression](assets/md/duck_rec.png)
 *Figure 3: Reconstruction of silhouette with increasing number of Fourier Harmonics ($K = 1, 3, 5, 20, 100, 1000$).*
 
 > As $K$ increases, the reconstruction quality improves and closely matches the original silhouette.
