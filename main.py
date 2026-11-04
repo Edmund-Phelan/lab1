@@ -3,6 +3,8 @@ import yaml
 
 from PIL import Image
 from os import path as opath
+from mypylibs import trajectory
+import matplotlib.pyplot as plt
 
 ROOT_IN = 'in'
 ROOT_OUT = 'out'
@@ -13,7 +15,11 @@ def main(case: int):
     img = Image.open(opath.join(ROOT_IN, f'{case:02}.{EXT}'))
     with open(opath.join(ROOT_IN, f'{case:02}.yaml')) as f:
         params = yaml.safe_load(f)
-    
+
+    # Expected outputs per case
+    # plt.savefig(opath.join(ROOT_OUT, f'{case:02}_transforms.{EXT}'))
+    # plt.savefig(opath.join(ROOT_OUT, f'{case:02}_trajectory.{EXT}'))
+    # plt.savefig(opath.join(ROOT_OUT, f'{case:02}_final.{EXT}'))
 
 if __name__ == '__main__':
 
