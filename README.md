@@ -1,7 +1,11 @@
 # CS6524: Computer Vision — Lab 1: Silhouettes and Fourier Epicycles
 
 **Immersive Software Engineering (ISE) — University of Limerick**  
-**Instructor:** Juan Albarracín | **Teacher Assistant:** Thendral Balakrishnan | **Module Lead:** James Patten  
+
+**Instructor:** Juan Albarracín [✉️](mailto:Juan.Albarracin@ul.ie)\
+**Teacher Assistant:** Thendral Balakrishnan [✉️](mailto:balakrishnan.thendral@ul.ie)\
+**Module Lead:** James Patten [✉️](mailto:James.Patten@ul.ie)
+
 **Deadline:** Sunday, November 8th at Midnight (Autumn Semester Week 2)
 
 ---
@@ -16,7 +20,7 @@ Understand the use of linear filters on images given a specific objective, and l
 
 An **epicycle** is a geometric model from ancient and medieval astronomy in which a planet moves along a small circle (the epicycle) whose center travels along a larger circle (the deferent) centered on or near the Earth. Used primarily to describe planetary orbits prior to Kepler's laws of planetary motion, epicycles nowadays serve as an intuitive visualization of the Fourier decomposition of complex 2D signals.
 
-![Fourier Epicycles Concept Sketch](assets/md/fourier_epicycles_concept.png)
+![Fourier Epicycles Concept Sketch](assets/md/epicycle.png)
 *Figure 1: Fourier Epicycles Concept Sketch showing fundamental frequency ($n=1$) and higher harmonics ($n=3$) tracing a complex path.*
 
 ### How Epicycles Work
@@ -28,7 +32,7 @@ In this model, stacked vectors rotate independently around their respective orig
 * **Initial Vector Orientation:** Represents its phase ($\theta_k$).
 * **Tip-to-Tail Stacking:** Represents vector addition, i.e., the summation of complex harmonics.
 
-According to Fourier theory, any periodic signal can be represented as an infinite sum of harmonics. By extending this concept to a continuous 2D perimeter $z(t) = x(t) + iy(t)$, a specific configuration of rotating epicycles can reproduce any arbitrary closed silhouette in 2D space.
+According to Fourier theory, any periodic signal can be represented as an infinite sum of harmonics. By extending this concept to a continuous 2D perimeter $z(t) = x(t) + iy(t)$, a specific configuration of rotating epicycles can reproduce [any arbitrary closed silhouette in 2D space](https://www.dynamicmath.xyz/fourier-epicycles/sketches/t-rex/).
 
 In this laboratory, you will implement an algorithm that draws an object's silhouette using rotating epicycles. Your input will **not** be a pre-extracted set of boundary coordinates, but a raw natural image. You must first transform this image by applying sequential linear spatial filters (e.g., Gaussian smoothing and spatial derivative filters) to detect and extract the object's boundary before computing its Fourier descriptors.
 
@@ -54,21 +58,17 @@ In this laboratory, you will implement an algorithm that draws an object's silho
 
 Once you have identified the edge pixels corresponding to the silhouette, transform them into a 2D parametric curve $(x(t), y(t))$, where $x(t)$ is as close as possible to $x(t+1)$.
 
-![Trajectory Sorting Sequence](assets/md/duck_1.png)
-![Trajectory Sorting Sequence](assets/md/duck_2.png)
-![Trajectory Sorting Sequence](assets/md/duck_3.png)
-![Trajectory Sorting Sequence](assets/md/duck_4.png)
-![Trajectory Sorting Sequence](assets/md/duck_5.png)
-![Trajectory Sorting Sequence](assets/md/duck_6.png)
-![Trajectory Sorting Sequence](assets/md/duck_7.png)
-![Trajectory Sorting Sequence](assets/md/duck_8.png)
-![Trajectory Sorting Sequence](assets/md/duck_9.png)
+![Trajectory Sorting Sequence](assets/md/duck_mosaic.png)
 *Figure 2: Ordered progression of tracing the object's boundary pixel trajectory.*
 
 You can use the following reference Python snippet to sort and resample your silhouette points:
 
 ```python
 import numpy as np
+
+# Inputs
+#   edge_x: list of x-coordinates of all the pixels in the silhouette
+#   edge_y: list of y-coordinates of all the pixels in the silhouette
 
 # Unsorted pixel coordinates of the silhouette
 points = np.column_stack((edge_x, edge_y))
@@ -116,8 +116,10 @@ where:
 * $F[u]$ contains the harmonic amplitudes/phases.
 * $\omega[u]$ represents the corresponding frequencies.
 
+Below you can see different reconstructions according to the number of harmonics:
+
 ![Harmonic Reconstruction Progression](assets/md/duck_rec.png)
-*Figure 3: Reconstruction of silhouette with increasing number of Fourier Harmonics ($K = 1, 3, 5, 20, 100, 1000$).*
+*Figure 3: Reconstruction of silhouette with increasing number of Fourier Harmonics ($K = 1, 2, 5, 10, 100, 1000$).*
 
 > As $K$ increases, the reconstruction quality improves and closely matches the original silhouette.
 
