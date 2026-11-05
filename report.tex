@@ -17,11 +17,11 @@
 
 \title{CS6524 Computer Vision Lab. 1\\ Silhouettes and Fourier Epicycles}
 
-\author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+\author{\IEEEauthorblockN{1\textsuperscript{st} Dawid Jakubowski}
+\IEEEauthorblockA{\textit{ISE} \\
+\textit{University of Limerick}\\
+Limerick, Ireland \\
+23384549@studentmail.ul.ie}
 \and
 \IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
 \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
@@ -38,12 +38,35 @@ email address or ORCID}
 
 \maketitle
 
-\begin{abstract}
-Describe in few words the work done, the lessons learned, and results.
-\end{abstract}
-
 \section{Introduction}
-This document contains some examples of basic {\LaTeX} functions.
+This document explains the image transformations conducted. It explains the methodology, justification and discussion for each transformation. 
+
+\section{Methodology}
+\subsection{Grayscale}
+\subsection{Blurring}
+\subsection{Thresholding}
+Binary thresholding was applied to the grayscale image to separate the foreground object from the background. The function accepts a 2D NumPy array and compares each pixel's intensity against a fixed threshold of 240. Pixels greater than or equal to the threshold are assigned 255 (white), while the remaining pixels are assigned 0 (black). The resulting binary image is returned as a NumPy array of type `uint8` for further processing.
+
+\subsection{Border Detection}
+
+
+\section{Justification}
+\subsection{Grayscale}
+\subsection{Blurring}
+\subsection{Thresholding}
+A fixed threshold of 127 was initially selected because it is approximately the midpoint of the 8-bit grayscale intensity range (0–255), however after testing this with various images we decided to change this value to 240 because our images had white backgrounds. NumPy's "np.where()" was used to apply the threshold across the entire image without explicit loops. The output was converted to `uint8` to maintain compatibility with other image-processing operations while minimizing memory usage.
+
+\subsection{Border Detection}
+
+
+\section{Discussion and failure analysis}
+\subsection{Grayscale}
+\subsection{Blurring}
+\subsection{Thresholding}
+Thresholding successfully converted the grayscale image into a binary representation. However, testing revealed that for our initial threshold value of 127, aspects of the foreground objects with similar intensities to the background were detected as the background (i.e. white).
+
+\subsection{Border Detection}
+
 
 \subsection{Lists}
 
