@@ -125,19 +125,56 @@ Below you can see different reconstructions according to the number of harmonics
 
 ---
 
-## 📋 Reporting and Submission Rules
-
-1. **Report:** Written in LaTeX following the **IEEE Conference Template** (maximum **3 pages**).
-2. **Code:** Standalone script runnable directly from a command prompt.
-   * Must show proof of working on **at least 5 different images**. Choose images containing a single high-contrast object. Plain shapes/textures are not allowed.
-   * **Restricted Libraries:** You **cannot** use high-level image processing libraries like OpenCV or `scikit-image`. `PIL` is allowed only for reading/writing images.
-   * **Allowed Libraries:** `NumPy`, `SciPy`, `PIL`, and `matplotlib`.
-   * **Filtering Requirement:** Linear filtering must be performed using `scipy.ndimage.convolve` or `scipy.ndimage.generic_filter` (you must design filter kernels manually).
-3. **IO Structure:** Your code should read images from an input folder and output results to an output folder.
-4. **Configuration:** If individual images require unique processing options, accept parameters via a `.json` configuration file.
-
----
-
 ## 🎁 Bonus (+1.0 Grade Point)
 
 Include an **MP4 animation** of the rendering process showing the rotating epicycles drawing the shape. Any animation library (e.g., `matplotlib.animation`, `ffmpeg`) is permitted for rendering the video.
+
+---
+
+## 📋 Submission Guidelines and Rules
+
+### 1. Repository Setup and Student Identification
+- **Forking Requirement:** You must fork the official starter repository into your own GitHub account or team space.
+- **Repository Naming Convention:** Rename your forked repository to: `cs6524-lab1-group<XX>`
+- **Identification (`TEAM.md`):** Add a `TEAM.md` file in the repository root with the full names, student IDs, and GitHub usernames of all team members before making your final push.
+
+### 2. Code Structure and Execution
+- **Main Entry Point:** All execution must be triggered by running `python main.py` in the repository root without any command-line arguments.
+- **Custom Modules:** Any additional helper scripts or custom functions must be placed inside the `mypylibs/` directory.
+- **Allowed and Prohibited Libraries:**
+    - **Allowed:** `PIL` (Pillow) for reading/saving image files, `matplotlib` for generating and saving mosaic figures, `scipy` (`scipy.ndimage` / `scipy.signal`) for convolution operations, and `numpy`.
+    - **General Policy:** Any standard library pre-installed in the provided base Docker container is acceptable as long as `python main.py` runs cleanly.
+    - **Strictly Prohibited:** OpenCV (`cv2`) and `scikit-image` are forbidden. You must design and build your own spatial filter kernels explicitly in Python.
+
+### 3. Input Specifications (`in/`)
+Provide at least 5 distinct test images (if you include the duck one from this description, then at least 6 images) in the `in/` directory:
+- **Naming Convention:** `00.png`, `01.png`, `02.png`, etc. (strictly two digits + `.png`).
+- **Optional Configuration:** If an image requires custom tuning parameters or thresholds, place a matching configuration file in `in/` (e.g., `00.yaml`).
+- **Image Selection and Resolution Limits:**
+    - Select real-world subjects with clear foreground objects and moderate surface texture. Avoid overly simple cartoon graphics as well as excessively cluttered scenes.
+    - **Resolution Limit:** Keep image dimensions small to moderate (e.g., $\le 600 \times 600\text{ px}$). Do not use HD images, as large boundary lengths will severely lag contour tracing and Fourier computations.
+
+### 4. Output Specifications (`out/`)
+For each input image `XX.png`, your script must programmatically save exactly three mosaic figures to the `out/` directory:
+1. `XX_transforms.png`: A multi-panel mosaic displaying the sequential intermediate spatial filter transformations applied to the image leading up to the extracted boundary mask. Each subplot must feature an informative title describing the applied operation.
+2. `XX_trajectory.png`: A grid of 10 sequential frames illustrating the temporal tracing of the resampled 2D boundary points over time. After uniform arc-length resampling, the 10 subplots must show the step-by-step progression of the boundary path from start ($t=0$) to closed contour ($t=T$).
+3. `XX_final.png`: A mosaic of 20 subplots displaying the Fourier silhouette reconstruction approximated using 5% to 100% of the dominant harmonicsv (in steps of 5%). Plot only the reconstructed 2D silhouette line—you do not need to render the rotating epicycle circles.
+4. `XX.mp4`: If opting for the bonus challenge, the video must contain an animated version of `XX_final.png` with the spinning epicycles.
+
+### 5. Written Report and Assets (`report.tex` and `assets/latex/`)
+- *File Location and Template:* Write your report in `report.tex` in the repository root, using the provided IEEE Transactions LaTeX template.
+- **Report Assets (`assets/latex/`):** Place all figures, sub-diagrams, and external files needed for your LaTeX report inside the `assets/latex/` directory to keep the root directory tidy.
+- **Length Limit:** Maximum 3 pages (including figures and references).
+- **Required Content:**
+    - **Methodology:** Concise description of your image processing pipeline and 1D complex Fourier descriptor formulation.
+    - **Justifications:** Technical reasoning behind your spatial filter designs, kernel selections, and thresholding choices.
+    - **Discussion and Failure Analysis:** Critical analysis of where the pipeline succeeded or failed, along with concrete steps for improvement if given more time.
+- **Writing Quality and Authenticity:** Be brief, rigorous, and specific. Your analysis must convince the reader that you personally conducted the experiments, understood the mathematical trade-offs, and derived the insights yourself. Avoid pasting generic, boilerplate text from LLMs—reports that read like unverified AI summaries will be flagged and incur heavy grade deductions.
+
+### 6. CI/CD Pipeline, Local Testing and Bonus Point
+- **Automated Workflow:** GitHub Actions will execute `main.py` and compile `report.tex` into `report.pdf` upon pushing to `main`.
+- **Local Docker Testing:** It is strongly recommended to test your code locally using the provided Docker environment before pushing to ensure pipeline compatibility.
+- **Workflow Modifications and Bonus Point (+1):**
+    - **Default Rule:** Modifying `.github/workflows/pipeline.yml` is not permitted.
+    - **Bonus Challenge (+1 Point):** If your solution requires additional Python dependencies not included in the base Docker image, you may claim the bonus point by adding a `requirements.txt` file and updating `.github/workflows/pipeline.yml` to install them prior to running main.py.
+    - **⚠️ Resource Disclaimer for Bonus Seekers:** Any extra dependencies or heavy computations added for the bonus point are strictly at your own risk. The CI runner environment has limited CPU, memory, and timeout thresholds. If your extra computation exhausts server resources or causes the job to time out, your submission will fail. Make sure your code runs as efficiently and smoothly as possible!
