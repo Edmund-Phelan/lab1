@@ -5,7 +5,7 @@ from PIL import Image
 from pathlib import Path
 
 
-def apply_threshold(image: np.ndarray, threshold: int = 127) -> np.ndarray:
+def apply_threshold(image: np.ndarray, threshold: int = 240) -> np.ndarray:
     if image.ndim != 2:
         raise ValueError("Thresholding requires a 2D grayscale image.")
 
