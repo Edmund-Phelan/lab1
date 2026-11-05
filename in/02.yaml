@@ -1,0 +1,11 @@
+image:
+  extension: png
+
+blur:
+  sigma: 1.0
+
+threshold:
+  value: 128
+
+borders:
+  relative_threshold: 0.5

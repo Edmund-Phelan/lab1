@@ -19,19 +19,37 @@ def main(case: int):
 
     img = Image.open(opath.join(ROOT_IN, f'{case:02}.{EXT}'))
     imgArray = np.asarray(img.convert('RGB'))
-    grey_img = get_greyscale(imgArray)
-    blurred_img = gaussian_blur(grey_img, sigma=1.0)
-    thresholded_img = apply_threshold(blurred_img, threshold=0.5)
-    border_img = get_borders(thresholded_img, threshold=0.5)
-    print(border_img.shape)
     
     with open(opath.join(ROOT_IN, f'{case:02}.yaml')) as f:
         params = yaml.safe_load(f)
 
-    # Expected outputs per case
-    plt.savefig(opath.join(ROOT_OUT, f'{case:02}_transforms.{EXT}'))
-    plt.savefig(opath.join(ROOT_OUT, f'{case:02}_trajectory.{EXT}'))
-    plt.savefig(opath.join(ROOT_OUT, f'{case:02}_final.{EXT}'))
+    grey_img = get_greyscale(imgArray)
+    blurred_img = gaussian_blur(grey_img, sigma=params['blur']['sigma'])
+    thresholded_img = apply_threshold(blurred_img, threshold=params['threshold']['value'])
+    border_img = get_borders(
+        thresholded_img,
+        threshold=params['borders']['relative_threshold'],
+    )
+    print(border_img.shape)
+
+    fig, axes = plt.subplots(2, 3, figsize=(12, 8))
+    panels = [
+        (imgArray, 'Original image', None),
+        (grey_img, 'Greyscale', 'gray'),
+        (blurred_img, 'Gaussian blur', 'gray'),
+        (thresholded_img, 'Threshold', 'gray'),
+        (border_img, 'Detected borders', 'gray'),
+    ]
+
+    for ax, (image, title, cmap) in zip(axes.flat, panels):
+        ax.imshow(image, cmap=cmap, vmin=0, vmax=255)
+        ax.set_title(title)
+        ax.axis('off')
+
+    axes.flat[-1].axis('off')
+    fig.tight_layout()
+    fig.savefig(opath.join(ROOT_OUT, f'{case:02}_transforms.{EXT}'))
+    plt.close(fig)
 
 if __name__ == '__main__':
 
