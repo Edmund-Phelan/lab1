@@ -9,11 +9,11 @@ from mypylibs.greyscale import get_greyscale
 from mypylibs.blurring import gaussian_blur
 from mypylibs.thresholding import apply_threshold
 from mypylibs.borders import get_borders
-from mypylibs.visualization import save_transform
+from mypylibs import fourier
+from mypylibs.visualization import save_transform, save_trajectory, save_final, save_animation
 
 ROOT_IN = 'in'
 ROOT_OUT = 'out'
-EXT = 'png'
 
 def main(case: int):
 
@@ -32,7 +32,6 @@ def main(case: int):
         thresholded_img,
         threshold=params['borders']['relative_threshold'],
     )
-    print(border_img.shape)
 
     save_transform(
         imgArray,
@@ -40,8 +39,22 @@ def main(case: int):
         blurred_img,
         thresholded_img,
         border_img,
-        opath.join(ROOT_OUT, f'{case:02}_transforms.{params["image"]["extension"]}'),
+        opath.join(ROOT_OUT, f'{case:02}_transforms.png'),
     )
+
+    # Silhouette trajectory: ordered, uniformly resampled boundary points
+    x, y = trajectory.calculate(border_img, num_samples=500)
+    save_trajectory(x, y, border_img.shape, opath.join(ROOT_OUT, f'{case:02}_trajectory.png'))
+
+    # Fourier epicycles: reconstruct with 5%..100% of the dominant harmonics
+    Z, freqs = fourier.descriptors(x, y)
+    N = len(Z)
+    percents = range(5, 101, 5)
+    recons = [fourier.reconstruct(Z, freqs, max(1, round(N * p / 100)), N) for p in percents]
+    save_final(recons, percents, border_img.shape, opath.join(ROOT_OUT, f'{case:02}_final.png'))
+
+    # Bonus: MP4 of the rotating epicycles
+    save_animation(Z, freqs, border_img.shape, opath.join(ROOT_OUT, f'{case:02}.mp4'))
 
 if __name__ == '__main__':
 
