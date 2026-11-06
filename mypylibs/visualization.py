@@ -88,7 +88,6 @@ def save_animation(Z, freqs, shape, output_path, step=2, fps=30) -> None:
     Z, freqs = Z[freqs != 0], freqs[freqs != 0]
     radii = np.abs(Z) / N
     circle = np.exp(1j * np.linspace(0, 2 * np.pi, 40))
-    # ponytail: circles smaller than half a pixel are invisible, skip drawing them
     drawn = radii > 0.5
 
     fig, ax = plt.subplots(figsize=(6, 6 * shape[0] / shape[1]))
@@ -103,7 +102,6 @@ def save_animation(Z, freqs, shape, output_path, step=2, fps=30) -> None:
         vectors = Z / N * np.exp(2j * np.pi * freqs * n / N)
         joints = centre + np.concatenate(([0], np.cumsum(vectors)))
         trace.append(joints[-1])
-        # All circles as one line, separated by NaN, so drawing stays fast
         rings = joints[:-1][drawn, None] + radii[drawn, None] * circle
         rings = np.column_stack((rings, np.full(len(rings), np.nan))).ravel()
         circles_line.set_data(rings.real, rings.imag)
