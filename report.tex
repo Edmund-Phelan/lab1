@@ -23,17 +23,23 @@
 Limerick, Ireland \\
 23384549@studentmail.ul.ie}
 \and
-\IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+\IEEEauthorblockN{2\textsuperscript{nd} Edmund Phelan}
+\IEEEauthorblockA{\textit{ISE} \\
+\textit{University of Limerick}\\
+Limerick, Ireland \\
+23397179@studentmail.ul.ie}
 \and
-\IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+\IEEEauthorblockN{3\textsuperscript{rd} Andrew Jaffray}
+\IEEEauthorblockA{\textit{ISE} \\
+\textit{University of Limerick}\\
+Limerick, Ireland \\
+23382163@studentmail.ul.ie}
+\and
+\IEEEauthorblockN{4\textsuperscript{th} Ois\'{\i}n Frizzell}
+\IEEEauthorblockA{\textit{ISE} \\
+\textit{University of Limerick}\\
+Limerick, Ireland \\
+23368276@studentmail.ul.ie}
 }
 
 \maketitle
@@ -43,15 +49,48 @@ This document explains the image transformations conducted. It explains the meth
 
 \section{Methodology}
 \subsection{Grayscale}
+The input image is loaded as a NumPy array of shape $(H, W, 3)$. The function first checks the number of dimensions: if the array is already 2D, the image is already grayscale and is returned unchanged. Otherwise, each pixel is converted to a single intensity $Y$ using a weighted sum of its red, green and blue channels:
+\begin{equation}
+Y = 0.299R + 0.587G + 0.114B
+\label{eq:luma}
+\end{equation}
+The result is rounded to the nearest integer and returned as a 2D \texttt{uint8} array.
 \subsection{Blurring}
 \subsection{Thresholding}
 Binary thresholding was applied to the grayscale image to separate the foreground object from the background. The function accepts a 2D NumPy array and compares each pixel's intensity against a fixed threshold of 240. Pixels greater than or equal to the threshold are assigned 255 (white), while the remaining pixels are assigned 0 (black). The resulting binary image is returned as a NumPy array of type `uint8` for further processing.
 
 \subsection{Border Detection}
 
+\begin{figure}
+\centerline{\includegraphics[width=\columnwidth]{04_transforms.png}}
+\caption{Pre-processing pipeline applied to image 04.}
+\label{fig:transforms}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics[width=\columnwidth]{04_trajectory.png}}
+\caption{Tracing of the resampled boundary points from $t=0$ to $t=T$ for image 04.}
+\label{fig:trajectory}
+\end{figure}
+
+\begin{figure*}[!t]
+\centerline{\includegraphics[width=0.55\textwidth]{04_final.png}}
+\caption{Fourier reconstruction of image 04 using 5\% to 100\% of the dominant harmonics.}
+\label{fig:final}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.32\textwidth]{01_transforms.png}\hfill
+\includegraphics[width=0.32\textwidth]{02_transforms.png}\hfill
+\includegraphics[width=0.32\textwidth]{03_transforms.png}
+\caption{Pipeline results for images 01--03. Images 02 and 03 have white backgrounds and give a clean outer silhouette. Image 01 has a grey background and a dark shadow under the car, so thresholding merges the shadow with the body and the detected borders are fragmented.}
+\label{fig:others}
+\end{figure*}
 
 \section{Justification}
 \subsection{Grayscale}
+The weights in (\ref{eq:luma}) are the ITU-R BT.601 luma coefficients, a standard for converting colour to grayscale. Our eyes are most sensitive to green and least sensitive to blue, so weighting the channels this way keeps the relative brightness of the image as we perceive it, rather than taking a plain average of the three channels. This preserves the contrast between the object and its background that the later thresholding step depends on. The 2D check means the function also accepts images that are already grayscale, so it can be safely applied to any input.
 \subsection{Blurring}
 \subsection{Thresholding}
 A fixed threshold of 127 was initially selected because it is approximately the midpoint of the 8-bit grayscale intensity range (0–255), however after testing this with various images we decided to change this value to 240 because our images had white backgrounds. NumPy's "np.where()" was used to apply the threshold across the entire image without explicit loops. The output was converted to `uint8` to maintain compatibility with other image-processing operations while minimizing memory usage.
@@ -61,69 +100,22 @@ A fixed threshold of 127 was initially selected because it is approximately the 
 
 \section{Discussion and failure analysis}
 \subsection{Grayscale}
+Grayscaling worked well on images 01, 03 and 04 (Fig.~\ref{fig:transforms} and Fig.~\ref{fig:others}): their colours map to clearly different intensities, so no regions merged. Image 02 exposed the main weakness of a fixed weighted sum. Superman's red cape and blue suit end up at very similar gray levels, because different combinations of $R$, $G$ and $B$ can produce the same $Y$ in (\ref{eq:luma}). Only his shorts remain slightly distinguishable. This colour information is lost permanently, so later stages cannot separate these regions. Given more time, we would detect edges on each colour channel separately, or convert to a colour space such as HSV and use hue, so that colours with equal brightness stay distinct.
 \subsection{Blurring}
 \subsection{Thresholding}
-Thresholding successfully converted the grayscale image into a binary representation. However, testing revealed that for our initial threshold value of 127, aspects of the foreground objects with similar intensities to the background were detected as the background (i.e. white).
+Thresholding successfully converted the grayscale image into a binary representation. However, testing revealed that for our initial threshold value of 127, aspects of the foreground objects with similar intensities to the background were detected as the background (i.e. white), as shown in Fig.~\ref{fig:thresh127}.
+
+\begin{figure}
+\centerline{\includegraphics[width=\columnwidth]{threshold127.png}}
+\caption{Thresholding with a value of 127: the light paws and face are lost to the background.}
+\label{fig:thresh127}
+\end{figure}
+
+
+Fig.~\ref{fig:others} shows the same pipeline on our other test images. The pipeline works well when the background is white (02, 03), but fails on image 01, where the grey background and shadow fall on the wrong side of the threshold.
 
 \subsection{Border Detection}
 
-
-\subsection{Lists}
-
-List can be bulleted\dots
-\begin{itemize}
-\item First
-\item Second
-\item Third
-\end{itemize}
-
-Or enumerated
-
-\begin{enumerate}
-\item First
-\item Second
-\item Third
-\end{enumerate}
-
-\subsection{Equations}
-
-Equations can have their own environment,
-\begin{equation}
-a+b=\gamma\label{eq}
-\end{equation}
-and be reference (Equation~\ref{eq}), or can be inline and blend in the text like this: $\sum_{i=0}^{N}x_i$, like any other word.
-
-\subsection{Figures and Tables}
-
-\begin{table}
-\caption{Table Type Styles}
-\begin{center}
-\begin{tabular}{|c|c|c|c|}
-\hline
-\textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
-\cline{2-4} 
-\textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
-\hline
-copy& More table copy$^{\mathrm{a}}$& &  \\
-\hline
-\multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
-\end{tabular}
-\label{tab1}
-\end{center}
-\end{table}
-
-\begin{figure}
-% Uncomment the line below to include an image from a source file
-\centerline{\includegraphics{fig1.png}}
-\caption{Example of a figure caption.}
-\label{fig}
-\end{figure}
-
-They appear by default on top of the text, and you reference like this: Figure~\ref{fig} and Table~\ref{tab1}.
-
-\subsection{Citations}
-
-If you need to cite external sources, use the \texttt{report.bib} file. As an example, here's how you cite the textbook~\cite{foundationsCVbook}.
 
 \printbibliography
 
