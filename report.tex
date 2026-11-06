@@ -60,6 +60,7 @@ The result is rounded to the nearest integer and returned as a 2D \texttt{uint8}
 Binary thresholding was applied to the grayscale image to separate the foreground object from the background. The function accepts a 2D NumPy array and compares each pixel's intensity against a fixed threshold of 240. Pixels greater than or equal to the threshold are assigned 255 (white), while the remaining pixels are assigned 0 (black). The resulting binary image is returned as a NumPy array of type `uint8` for further processing.
 
 \subsection{Border Detection}
+Border detection was applied to the binary image from the thresholding step to find the outline of the object. The function uses two small $3\times3$ filters called Sobel kernels. One finds edges that run left to right and the other finds edges that run top to bottom. Each filter is slid across the image to measure how quickly the brightness changes in that direction, giving two gradient images $g_x$ and $g_y$. These are combined into a single edge strength for each pixel using the gradient magnitude $G=\sqrt{g_x^2+g_y^2}$. A pixel is then marked as a border if its strength is above a cut-off and marked as background otherwise. Instead of a fixed cut-off, the strength is compared against a fraction of the strongest edge in the image, so only the clearest edges are kept. The result is returned as a 2D uint8 array showing the object's borders.
 
 \begin{figure}
 \centerline{\includegraphics[width=\columnwidth]{04_transforms.png}}
@@ -96,7 +97,7 @@ The weights in (\ref{eq:luma}) are the ITU-R BT.601 luma coefficients, a standar
 A fixed threshold of 127 was initially selected because it is approximately the midpoint of the 8-bit grayscale intensity range (0–255), however after testing this with various images we decided to change this value to 240 because our images had white backgrounds. NumPy's "np.where()" was used to apply the threshold across the entire image without explicit loops. The output was converted to `uint8` to maintain compatibility with other image-processing operations while minimizing memory usage.
 
 \subsection{Border Detection}
-
+The Sobel filters were built by hand because OpenCV is not allowed for this lab. Sobel was chosen over a plain difference filter because it also smooths the image slightly while measuring the change in brightness, which stops small specks of noise from being mistaken for edges. Combining the horizontal and vertical results through the magnitude means the detector responds to edges pointing in any direction and not just straight across or straight up. We compared the edge strength against a fraction of the strongest edge rather than a fixed number so that the same setting works across different images without re-tuning. Because the input is already black and white, every real boundary produces an edge of similar strength, so a relative threshold cleanly separates the single object outline.
 
 \section{Discussion and failure analysis}
 \subsection{Grayscale}
@@ -115,7 +116,7 @@ Thresholding successfully converted the grayscale image into a binary representa
 Fig.~\ref{fig:others} shows the same pipeline on our other test images. The pipeline works well when the background is white (02, 03), but fails on image 01, where the grey background and shadow fall on the wrong side of the threshold.
 
 \subsection{Border Detection}
-
+Border detection worked well when thresholding produced a clean solid shape, giving a thin and mostly continuous outline. Its main weakness is that it depends on the earlier steps. When the shadow under an object joins onto it during thresholding, the outline comes out broken with gaps in it, which later forces the trajectory step to jump across the empty space between the disconnected pieces. The borders are also sometimes two pixels thick instead of one, because a sharp edge creates a strong change on both of its sides. With more time we would thin the borders down to a single pixel and add a step to close the small gaps before tracing the outline.
 
 \printbibliography
 
